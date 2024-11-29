@@ -21,17 +21,32 @@ namespace api.Database
 
             await command.ExecuteNonQueryAsync();
         }
-        public async Task<bool> GetByEmailAsync(string email)
+        public async Task<User?> GetByEmailAsync(string email)
         {
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT COUNT(*) FROM users WHERE email = @email";
+            const string query = "SELECT id, login, hash_password FROM users WHERE email = @email";
 
             using var command = new NpgsqlCommand(query, connection);
             command.Parameters.AddWithValue("@email", email);
-            var result = await command.ExecuteScalarAsync();
-            return Convert.ToInt32(result) > 0;
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (reader.Read())
+            {
+                Guid id = reader.GetGuid(0);
+                string login = reader.GetString(1);
+                string hashPassword = reader.GetString(2);
+                return new User()
+                {
+                    Id = id,
+                    Login = login,
+                    Email = email,
+                    HashPassword = hashPassword
+                };
+            }
+            return null;
         }
+
     }
 }
