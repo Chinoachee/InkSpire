@@ -5,8 +5,11 @@ using api.Models;
 
 namespace api.Services
 {
-    public class UserService(IUserRepository userRepository, IHashPasswordService hashPasswordService) : IUserService
+    public class UserService(IUserRepository userRepository,
+                             IHashPasswordService hashPasswordService,
+                             IJwtTokenService jwtTokenService) : IUserService
     {
+        private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IHashPasswordService _hashPasswordService = hashPasswordService;
         public async Task CreateUser(CreateUserRequest request)
@@ -27,7 +30,7 @@ namespace api.Services
             await _userRepository.AddAsync(user);
         }
         // Заменить на токен
-        public async Task<User?> AuthorizeUser(AuthorizationUserRequest request)
+        public async Task<string> AuthorizeUser(AuthorizationUserRequest request)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
 
@@ -41,7 +44,7 @@ namespace api.Services
                 throw new InvalidPasswordException();
             }
 
-            return user;
+            return _jwtTokenService.GenerateToken(user);
         }
     }
 }

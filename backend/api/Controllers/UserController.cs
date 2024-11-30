@@ -1,4 +1,5 @@
-﻿using api.Contracts.Users;
+﻿using System.Security.Principal;
+using api.Contracts.Users;
 using api.Exceptions;
 using api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -34,8 +35,8 @@ namespace api.Controllers
         {
             try
             {
-                var user = await _userService.AuthorizeUser(request);
-                return Ok(new { Message = "Успешная авторизация" });
+                var token = await _userService.AuthorizeUser(request);
+                return Ok(new { Message = "Успешная авторизация", Token = token });
             }
             catch (InvalidOperationException)
             {
