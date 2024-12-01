@@ -6,13 +6,24 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace api.Services
 {
-    public class JwtTokenService(IConfiguration configuration) : IJwtTokenService
+    public class JwtTokenService : IJwtTokenService
     {
-        private readonly IConfiguration _configuration = configuration;
+        private readonly IConfiguration _configuration;
+        private readonly string _issuer;
+        private readonly string _audience;
+        private readonly string _key;
+
+        public JwtTokenService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _issuer = _configuration["Jwt:Issuer"];
+            _audience = _configuration["Jwt:Audience"];
+            _key = _configuration["Jwt:Key"];
+        }
 
         public string GenerateToken(User user)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -24,14 +35,14 @@ namespace api.Services
         };
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: _issuer,
+                audience: _audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials
             );
 
-            return $"Bearer {new JwtSecurityTokenHandler().WriteToken(token)}";
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

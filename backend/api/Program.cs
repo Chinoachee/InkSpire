@@ -1,6 +1,8 @@
 using System.Text;
 using api.Database;
 using api.Services;
+using api.Services.Storys;
+using api.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -33,9 +35,16 @@ builder.Services.AddScoped<IUserRepository>(sp =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     return new UserRepository(connectionString);
 });
+builder.Services.AddScoped<IStoryRepository>(sp =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    return new StoryRepository(connectionString);
+});
 
 builder.Services.AddScoped<IHashPasswordService, HashPasswordService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
