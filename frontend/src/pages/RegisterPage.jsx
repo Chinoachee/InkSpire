@@ -1,75 +1,118 @@
 import React, { useState } from 'react';
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Heading,
+  Text,
+  Alert,
+  useColorMode,
+} from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../store/authSlice';
 
 const RegisterPage = () => {
-  const [login, setLogin] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch();
   const { status, error } = useSelector((state) => state.auth);
+  const { colorMode } = useColorMode();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(registerUser({ login,password, email  }));
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+    dispatch(registerUser({ username, email, password }));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="p-6 bg-white rounded shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-4">Register</h2>
+    <Flex
+      align="center"
+      justify="center"
+      minH="100vh"
+      bg={colorMode === 'light' ? 'gray.100' : 'gray.900'}
+      color={colorMode === 'light' ? 'black' : 'white'}
+    >
+      <Box
+        bg={colorMode === 'light' ? 'white' : 'gray.700'}
+        p={8}
+        rounded="lg"
+        shadow="lg"
+        w="400px"
+      >
+        <Heading textAlign="center" mb={6}>
+          Create an Account
+        </Heading>
+        {error && (
+          <Alert status="error" mb={4}>
+            {error}
+          </Alert>
+        )}
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2" htmlFor="login">
-              Login
-            </label>
-            <input
-              id="login"
+          <FormControl mb={4}>
+            <FormLabel>Username</FormLabel>
+            <Input
               type="text"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Enter your login"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              focusBorderColor="teal.400"
             />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
+          </FormControl>
+          <FormControl mb={4}>
+            <FormLabel>Email</FormLabel>
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
               placeholder="Enter your email"
+              focusBorderColor="teal.400"
             />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
+          </FormControl>
+          <FormControl mb={4}>
+            <FormLabel>Password</FormLabel>
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
               placeholder="Enter your password"
+              focusBorderColor="teal.400"
             />
-          </div>
-          {status === 'loading' && <p className="text-blue-500">Registering...</p>}
-          {error && <p className="text-red-500">{String(error)}</p>}
-          <button
+          </FormControl>
+          <FormControl mb={6}>
+            <FormLabel>Confirm Password</FormLabel>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              focusBorderColor="teal.400"
+            />
+          </FormControl>
+          <Button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-            disabled={status === 'loading'}
+            colorScheme="teal"
+            width="full"
+            isLoading={status === 'loading'}
           >
             Register
-          </button>
+          </Button>
         </form>
-      </div>
-    </div>
+        <Text mt={4} textAlign="center">
+          Already have an account?{' '}
+          <Text as="a" href="/login" color="teal.500" fontWeight="bold">
+            Login here
+          </Text>
+        </Text>
+      </Box>
+    </Flex>
   );
 };
 

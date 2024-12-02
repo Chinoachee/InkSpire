@@ -1,16 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux';
+import { ChakraProvider, extendTheme, ColorModeScript } from '@chakra-ui/react';
 import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import './styles/index.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <Provider store={store}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </Provider>
+// Настройка темы с поддержкой ColorMode
+const config = {
+  initialColorMode: 'light', // Начальный режим
+  useSystemColorMode: false, // Использовать системную тему
+};
+
+const theme = extendTheme({ config });
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <ChakraProvider theme={theme}>
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <BrowserRouter>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </BrowserRouter>
+    </ChakraProvider>
+  </React.StrictMode>
 );
