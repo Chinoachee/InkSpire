@@ -28,6 +28,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Адрес вашего React-приложения
+              .AllowAnyMethod()                   // Разрешить все HTTP-методы (GET, POST, PUT, DELETE)
+              .AllowAnyHeader()                   // Разрешить любые заголовки
+              .AllowCredentials();                // Если используете куки или авторизацию
+    });
+});
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUserRepository>(sp =>
@@ -92,6 +103,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 if (app.Environment.IsDevelopment())
 {
