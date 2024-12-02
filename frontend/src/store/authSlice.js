@@ -1,62 +1,82 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login, register} from '../services/authService';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { login, register } from '../services/authService';
+import jwtDecode from 'jwt-decode';
 
-export const loginUser = createAsyncThunk(
-    'auth/loginUser',
-    async({ email, password}, {rejectWithValue}) => {
-        try{
-            const data = await login(email,password);
-            return data;
-        }catch(error){
-            return rejectWithValue(error.response?.data?.message || 'Login failed');
-        }
+// Восстановление состояния из localStorage
+const initialState = () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const user = jwtDecode(token); // Декодируем токен
+      return { user, token, status: 'succeeded', error: null };
+    } catch (e) {
+      console.error('Invalid token:', e);
+      localStorage.removeItem('token'); // Удаляем токен, если он некорректный
     }
+  }
+  return { user: null, token: null, status: 'idle', error: null };
+};
+
+// Асинхронный экшен для авторизации
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      const data = await login(email, password); // Используем authService
+      const token = data.token;
+      const user = jwtDecode(token); // Декодируем токен
+      localStorage.setItem('token', token); // Сохраняем токен
+      return { user: { username: user.login }, token }; // Возвращаем пользователя и токен
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
+  }
 );
 
+// Асинхронный экшен для регистрации
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
-  async ({ login, email, password }, { rejectWithValue }) => {
+  async ({ login, password, email }, { rejectWithValue }) => {
     try {
-      const data = await register(login,password, email );
-      return data; // Сервер должен возвращать объект с информацией о пользователе
+      const data = await register(login, password, email); // Используем authService
+      const token = data.token;
+      const user = jwtDecode(token);
+      if (token) {
+        localStorage.setItem('token', token); // Сохраняем токен
+      }
+      return { user, token };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
 );
 
-
+// Создание authSlice
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null, // Информация о пользователе
-    token: null, // JWT-токен
-    status: 'idle', // idle | loading | succeeded | failed
-    error: null, // Сообщение об ошибке
-  },
+  initialState: initialState(), // Используем функцию для восстановления
   reducers: {
     logout: (state) => {
-      // Обнуляем данные при выходе
       state.user = null;
       state.token = null;
+      localStorage.removeItem('token'); // Удаляем токен из localStorage
     },
   },
   extraReducers: (builder) => {
     builder
-      // Обработка логина
+      // Обработка авторизации
       .addCase(loginUser.pending, (state) => {
         state.status = 'loading';
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.token = action.payload.token;
         state.user = action.payload.user;
-        localStorage.setItem('token', action.payload.token);
+        state.token = action.payload.token;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload || 'Unknown error';
+        state.error = action.payload || 'Login failed';
       })
 
       // Обработка регистрации
@@ -66,8 +86,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = action.payload.user; // Сохраняем данные пользователя
-        state.token = action.payload.token; // Сохраняем токен, если возвращается
+        state.user = action.payload.user;
+        state.token = action.payload.token;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = 'failed';
@@ -76,6 +96,6 @@ const authSlice = createSlice({
   },
 });
 
-
+// Экспортируем экшены и редьюсер
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;

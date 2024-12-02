@@ -11,13 +11,13 @@ import {
   Flex,
   useColorMode,
 } from '@chakra-ui/react';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { createStory } from '../services/storyService'; // Импортируем сервис
+import { useSelector } from 'react-redux';
+import { createStory } from '../services/storyService';
 
 const CreateStoryPage = () => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [initialText, setInitialText] = useState('');
   const [loading, setLoading] = useState(false);
   const { colorMode } = useColorMode();
   const toast = useToast();
@@ -26,8 +26,8 @@ const CreateStoryPage = () => {
 
   const handleCreateStory = async (e) => {
     e.preventDefault();
-
-    if (!title || !content) {
+  
+    if (!title || !initialText) {
       toast({
         title: 'Error',
         description: 'Please fill in all fields.',
@@ -37,10 +37,10 @@ const CreateStoryPage = () => {
       });
       return;
     }
-
+  
     setLoading(true);
     try {
-      await createStory(title, content, token); // Вызываем сервис
+      await createStory({ title, initialText, token }); // Токен теперь передаётся в заголовке
       toast({
         title: 'Story created successfully!',
         status: 'success',
@@ -48,8 +48,8 @@ const CreateStoryPage = () => {
         isClosable: true,
       });
       setTitle('');
-      setContent('');
-      navigate('/'); // Возврат на главную страницу
+      setInitialText('');
+      navigate('/'); // Перенаправляем на главную страницу
     } catch (error) {
       toast({
         title: 'Failed to create story',
@@ -62,7 +62,7 @@ const CreateStoryPage = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <Flex
       align="center"
@@ -95,8 +95,8 @@ const CreateStoryPage = () => {
           <FormControl mb={4}>
             <FormLabel>Story Content</FormLabel>
             <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              value={initialText}
+              onChange={(e) => setInitialText(e.target.value)}
               placeholder="Write your story here..."
               rows={8}
               isRequired

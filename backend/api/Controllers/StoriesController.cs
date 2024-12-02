@@ -8,7 +8,7 @@ namespace api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StorysControllers(IStoryService storyService, IUserService userService) : ControllerBase
+    public class StoriesController(IStoryService storyService, IUserService userService) : ControllerBase
     {
         private readonly IStoryService _storyService = storyService;
         private readonly IUserService _userService = userService;
