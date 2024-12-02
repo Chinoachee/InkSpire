@@ -20,9 +20,9 @@ namespace api.Controllers
                 await _userService.CreateUser(request);
                 return Ok();
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
-                return BadRequest();
+                return BadRequest(new { Message = e.Message});
             }
             catch (Exception ex)
             {

@@ -13,11 +13,13 @@ export const login = async (email, password) => {
     throw error.response?.data?.message || 'Login failed';
   }
 };
-export const register = async (email, password) => {
+
+export const register = async (login, password, email) => {
   try {
     const response = await axios.post(`${API_URL}/registration`, {
-      email,
+      login,
       password,
+      email,
     });
     return response.data; // Предполагаем, что сервер возвращает данные пользователя или сообщение об успешной регистрации
   } catch (error) {

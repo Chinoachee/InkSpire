@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login, register } from '../services/authService';
+import { login, register} from '../services/authService';
 
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
@@ -13,38 +13,68 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async ({ login, email, password }, { rejectWithValue }) => {
+    try {
+      const data = await register(login,password, email );
+      return data; // Сервер должен возвращать объект с информацией о пользователе
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Registration failed');
+    }
+  }
+);
+
+
 const authSlice = createSlice({
-    name: 'auth', // Имя среза (slice). Будет использоваться в action.type, например: 'auth/logout'.
-    initialState: { // Начальное состояние для этого slice.
-      user: null,        // Информация о пользователе (например, имя, email).
-      token: null,       // JWT-токен или иной маркер авторизации.
-      status: 'idle',    // Состояние запроса ('idle', 'loading', 'succeeded', 'failed').
-      error: null,       // Ошибки, если что-то пошло не так.
+  name: 'auth',
+  initialState: {
+    user: null, // Информация о пользователе
+    token: null, // JWT-токен
+    status: 'idle', // idle | loading | succeeded | failed
+    error: null, // Сообщение об ошибке
+  },
+  reducers: {
+    logout: (state) => {
+      // Обнуляем данные при выходе
+      state.user = null;
+      state.token = null;
     },
-    reducers: { // Список синхронных функций для изменения состояния.
-      logout: (state) => {
-        // Обнуляем данные при выходе из системы.
-        state.user = null;
-        state.token = null;
-      },
-    },
-    extraReducers: (builder) => { // Для обработки асинхронных экшенов (thunks).
-      builder
-        .addCase(loginUser.pending, (state) => {
-          state.status = 'loading'; // При начале логина устанавливаем статус "loading".
-          state.error = null;       // Сбрасываем предыдущие ошибки.
-        })
-        .addCase(loginUser.fulfilled, (state, action) => {
-          state.status = 'succeeded'; // Успешный логин.
-          state.token = action.payload.token; // Сохраняем токен.
-          state.user = action.payload.user;   // Сохраняем данные пользователя.
-        })
-        .addCase(loginUser.rejected, (state, action) => {
-          state.status = 'failed'; // Ошибка логина.
-          state.error = action.payload || 'Unknown error'; // Сохраняем сообщение об ошибке.
-        });
-    },
-  });
+  },
+  extraReducers: (builder) => {
+    builder
+      // Обработка логина
+      .addCase(loginUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || 'Unknown error';
+      })
+
+      // Обработка регистрации
+      .addCase(registerUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.user = action.payload.user; // Сохраняем данные пользователя
+        state.token = action.payload.token; // Сохраняем токен, если возвращается
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || 'Registration failed';
+      });
+  },
+});
+
 
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;
