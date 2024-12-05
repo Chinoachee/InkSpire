@@ -1,4 +1,4 @@
-﻿using api.Models;
+﻿using api.Models.Users;
 using Npgsql;
 
 namespace api.Database
@@ -43,6 +43,28 @@ namespace api.Database
                     Login = login,
                     Email = email,
                     HashPassword = hashPassword
+                };
+            }
+            return null;
+        }
+        // Потом поменять логику того что мы забираем от пользователя
+        public async Task<User?> GetByLoginAsync(string login)
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string query = "SELECT * FROM users WHERE login = @login";
+
+            using var command = new NpgsqlCommand(query, connection);
+            command.Parameters.AddWithValue("@login", login);
+            using var reader = await command.ExecuteReaderAsync();
+            if (reader.Read())
+            {
+                return new User()
+                {
+                    Id = reader.GetGuid(0),
+                    Login = reader.GetString(1),
+                    Email = reader.GetString(3)
                 };
             }
             return null;

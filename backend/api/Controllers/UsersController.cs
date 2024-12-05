@@ -1,6 +1,7 @@
-﻿using System.Security.Principal;
-using api.Contracts.Users;
+﻿using api.Contracts.Users;
 using api.Exceptions;
+using api.Models.Users;
+using api.Services.Storys;
 using api.Services.Users;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +9,10 @@ namespace api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController(IUserService userService) : ControllerBase
+    public class UsersController(IUserService userService, IStoryService storyService) : ControllerBase
     {
         private readonly IUserService _userService = userService;
+        private readonly IStoryService _storyService = storyService;
 
         [HttpPost("registration")]
         public async Task<IActionResult> Registration([FromBody] CreateUserRequest request)
@@ -22,7 +24,7 @@ namespace api.Controllers
             }
             catch (InvalidOperationException e)
             {
-                return BadRequest(new { Message = e.Message});
+                return BadRequest(new { Message = e.Message });
             }
             catch (Exception ex)
             {
@@ -49,6 +51,29 @@ namespace api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { Message = "Произошла ошибка на сервере", Details = ex.Message });
+            }
+        }
+
+        [HttpGet("/profile/{login}")]
+        public async Task<IActionResult> GetUserProfile(string login)
+        {
+            try
+            {
+                var user = await _userService.GetByLogin(login);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                var userStories = await _storyService.GetUserStory(user.Id);
+                return Ok(new
+                {
+                    User = new UserProfileDto(user.Login),
+                    Stories = userStories
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
             }
         }
     }

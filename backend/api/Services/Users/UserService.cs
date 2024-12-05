@@ -3,7 +3,7 @@ using System.Security.Claims;
 using api.Contracts.Users;
 using api.Database;
 using api.Exceptions;
-using api.Models;
+using api.Models.Users;
 
 namespace api.Services.Users
 {
@@ -50,6 +50,11 @@ namespace api.Services.Users
             }
 
             return _jwtTokenService.GenerateToken(user);
+        }
+        public async Task<User?> GetByLogin(string login)
+        {
+            var user = await _userRepository.GetByLoginAsync(login);
+            return user;
         }
 
         public Guid GetUserId()

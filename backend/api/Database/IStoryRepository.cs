@@ -1,10 +1,10 @@
-﻿using api.Models;
+﻿using api.Models.Stories;
 
 namespace api.Database
 {
     public interface IStoryRepository
     {
         Task AddAsync(Story story);
-        IEnumerable<Story> GetAllByAuthorIdAsync(Guid authorId);
+        Task<IEnumerable<Story>> GetAllByAuthorIdAsync(Guid authorId);
     }
 }

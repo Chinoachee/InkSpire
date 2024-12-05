@@ -1,4 +1,4 @@
-﻿namespace api.Models
+﻿namespace api.Models.Stories
 {
     public class Story
     {

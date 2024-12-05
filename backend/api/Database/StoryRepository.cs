@@ -1,4 +1,4 @@
-﻿using api.Models;
+﻿using api.Models.Stories;
 using Npgsql;
 
 namespace api.Database
@@ -22,9 +22,26 @@ namespace api.Database
             await command.ExecuteNonQueryAsync();
         }
 
-        public IEnumerable<Story> GetAllByAuthorIdAsync(Guid authorId)
+        public async Task<IEnumerable<Story>> GetAllByAuthorIdAsync(Guid authorId)
         {
-            throw new NotImplementedException();
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string query = "SELECT * FROM storys WHERE author_id = @authorId";
+            
+            using var command = new NpgsqlCommand(query,connection);
+            command.Parameters.AddWithValue("@authorId",authorId);
+
+            using var reader = await command.ExecuteReaderAsync();
+            var result = new List<Story>();
+            while (await reader.ReadAsync())
+            {
+                result.Add(new Story() {
+                    Id = reader.GetGuid(0),
+                    Title = reader.GetString(1),
+                });
+            }
+            return result;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using api.Contracts.Storys;
 using api.Database;
-using api.Models;
+using api.Models.Stories;
 
 namespace api.Services.Storys
 {
@@ -16,6 +16,12 @@ namespace api.Services.Storys
                 AuthorId = authorId
             };
             await _storyRepository.AddAsync(story);
+        }
+
+        public async Task<IEnumerable<StoryProfileDto>> GetUserStory(Guid authorId)
+        {
+            var result = await _storyRepository.GetAllByAuthorIdAsync(authorId);
+            return result.Select(s => new StoryProfileDto(s.Id, s.Title));
         }
     }
 }

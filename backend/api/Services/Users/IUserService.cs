@@ -1,4 +1,5 @@
 ﻿using api.Contracts.Users;
+using api.Models.Users;
 
 namespace api.Services.Users
 {
@@ -6,6 +7,7 @@ namespace api.Services.Users
     {
         Task CreateUser(CreateUserRequest request);
         Task<string> AuthorizeUser(AuthorizationUserRequest request);
+        Task<User?> GetByLogin(string login);
         Guid GetUserId();
     }
 }
