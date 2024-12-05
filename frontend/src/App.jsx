@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import RegisterPage from './pages/RegisterPage';
 import CreateStoryPage from './pages/CreateStoryPage';
+import UserProfilePage from './pages/UserProfilePage';
 import Header from './components/Header'
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -42,6 +43,7 @@ const App = () => {
           isAuthenticated ? <CreateStoryPage /> : <Navigate to="/login" />
         }
       />
+      <Route path="/profile/:login" element={<UserProfilePage />} />
     </Routes>
     </>
   );

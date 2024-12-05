@@ -2,47 +2,44 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login, register } from '../services/authService';
 import jwtDecode from 'jwt-decode';
 
-// Восстановление состояния из localStorage
 const initialState = () => {
   const token = localStorage.getItem('token');
   if (token) {
     try {
-      const user = jwtDecode(token); // Декодируем токен
+      const user = jwtDecode(token);
       return { user, token, status: 'succeeded', error: null };
     } catch (e) {
       console.error('Invalid token:', e);
-      localStorage.removeItem('token'); // Удаляем токен, если он некорректный
+      localStorage.removeItem('token');
     }
   }
   return { user: null, token: null, status: 'idle', error: null };
 };
 
-// Асинхронный экшен для авторизации
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const data = await login(email, password); // Используем authService
+      const data = await login(email, password);
       const token = data.token;
-      const user = jwtDecode(token); // Декодируем токен
-      localStorage.setItem('token', token); // Сохраняем токен
-      return { user: { username: user.login }, token }; // Возвращаем пользователя и токен
+      const user = jwtDecode(token);
+      localStorage.setItem('token', token);
+      return { user: { username: user.login }, token };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
 
-// Асинхронный экшен для регистрации
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async ({ login, password, email }, { rejectWithValue }) => {
     try {
-      const data = await register(login, password, email); // Используем authService
+      const data = await register(login, password, email);
       const token = data.token;
       const user = jwtDecode(token);
       if (token) {
-        localStorage.setItem('token', token); // Сохраняем токен
+        localStorage.setItem('token', token);
       }
       return { user, token };
     } catch (error) {
@@ -51,7 +48,6 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// Создание authSlice
 const authSlice = createSlice({
   name: 'auth',
   initialState: initialState(), // Используем функцию для восстановления
@@ -96,6 +92,5 @@ const authSlice = createSlice({
   },
 });
 
-// Экспортируем экшены и редьюсер
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;

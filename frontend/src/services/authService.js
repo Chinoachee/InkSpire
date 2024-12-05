@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5157/api/users'; // Замените на ваш API-адрес
+const API_URL = 'http://localhost:5157/api/users'; 
 
 export const login = async (email, password) => {
   try {
@@ -8,7 +8,7 @@ export const login = async (email, password) => {
       email,
       password,
     });
-    return response.data; // Возвращаем токен или пользовательские данные
+    return response.data;
   } catch (error) {
     throw error.response?.data?.message || 'Login failed';
   }
@@ -21,7 +21,7 @@ export const register = async (login, password, email) => {
       password,
       email,
     });
-    return response.data; // Предполагаем, что сервер возвращает данные пользователя или сообщение об успешной регистрации
+    return response.data;
   } catch (error) {
     throw error.response?.data?.message || 'Registration failed';
   }
