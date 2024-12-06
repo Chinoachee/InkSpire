@@ -2,65 +2,50 @@ import React, { useState } from 'react';
 import {
   Box,
   Button,
+  Flex,
   FormControl,
   FormLabel,
   Input,
-  Textarea,
   Heading,
-  useToast,
-  Flex,
+  Alert,
   useColorMode,
 } from '@chakra-ui/react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { createStory } from '../services/storyService'; // Импортируем сервис
 
-const CreateStoryPage = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(false);
+const RegisterPage = () => {
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const dispatch = useDispatch();
+  const { status, error } = useSelector((state) => state.auth);
   const { colorMode } = useColorMode();
-  const toast = useToast();
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
 
-  const handleCreateStory = async (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!title || !content) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in all fields.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+    if (form.password !== form.confirmPassword) {
+      alert('Passwords do not match!');
       return;
     }
 
-    setLoading(true);
-    try {
-      await createStory(title, content, token); // Вызываем сервис
-      toast({
-        title: 'Story created successfully!',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      setTitle('');
-      setContent('');
-      navigate('/'); // Возврат на главную страницу
-    } catch (error) {
-      toast({
-        title: 'Failed to create story',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
-    }
+    dispatch(registerUser({
+      login: form.username,
+      password: form.password,
+      email: form.email,
+    })).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') navigate('/login');
+    });
   };
 
   return (
@@ -71,44 +56,58 @@ const CreateStoryPage = () => {
       bg={colorMode === 'light' ? 'gray.100' : 'gray.900'}
       color={colorMode === 'light' ? 'black' : 'white'}
     >
-      <Box
-        bg={colorMode === 'light' ? 'white' : 'gray.700'}
-        p={8}
-        rounded="lg"
-        shadow="lg"
-        w="600px"
-      >
-        <Heading mb={6} textAlign="center">
-          Create a New Story
+      <Box bg={colorMode === 'light' ? 'white' : 'gray.700'} p={8} rounded="lg" shadow="lg" w="400px">
+        <Heading textAlign="center" mb={6}>
+          Create an Account
         </Heading>
-        <form onSubmit={handleCreateStory}>
+        {error && <Alert status="error" mb={4}>{error}</Alert>}
+        <form onSubmit={handleSubmit}>
           <FormControl mb={4}>
-            <FormLabel>Story Title</FormLabel>
+            <FormLabel>Username</FormLabel>
             <Input
+              name="username"
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter the title of your story"
-              isRequired
+              value={form.username}
+              onChange={handleChange}
+              placeholder="Enter your username"
+              required
             />
           </FormControl>
           <FormControl mb={4}>
-            <FormLabel>Story Content</FormLabel>
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your story here..."
-              rows={8}
-              isRequired
+            <FormLabel>Email</FormLabel>
+            <Input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
             />
           </FormControl>
-          <Button
-            type="submit"
-            colorScheme="teal"
-            isLoading={loading}
-            width="full"
-          >
-            Create Story
+          <FormControl mb={4}>
+            <FormLabel>Password</FormLabel>
+            <Input
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+            />
+          </FormControl>
+          <FormControl mb={6}>
+            <FormLabel>Confirm Password</FormLabel>
+            <Input
+              name="confirmPassword"
+              type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+              required
+            />
+          </FormControl>
+          <Button type="submit" colorScheme="blue" width="full" isLoading={status === 'loading'}>
+            Register
           </Button>
         </form>
       </Box>
@@ -116,4 +115,4 @@ const CreateStoryPage = () => {
   );
 };
 
-export default CreateStoryPage;
+export default RegisterPage;

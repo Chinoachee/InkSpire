@@ -12,7 +12,7 @@ namespace api.Database
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "INSERT INTO users (login, hash_password, email) VALUES (@login, @hash_password, @email);";
+            const string query = "INSERT INTO users (login, password_hash, email) VALUES (@login, @hash_password, @email);";
 
             using var command = new NpgsqlCommand(query, connection);
             command.Parameters.AddWithValue("@login", user.Login);
@@ -26,7 +26,7 @@ namespace api.Database
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT id, login, hash_password FROM users WHERE email = @email";
+            const string query = "SELECT id, login, password_hash FROM users WHERE email = @email";
 
             using var command = new NpgsqlCommand(query, connection);
             command.Parameters.AddWithValue("@email", email);

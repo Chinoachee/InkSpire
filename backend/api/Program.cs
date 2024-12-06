@@ -32,7 +32,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Адрес вашего React-приложения
+        policy.WithOrigins("http://localhost:5174") // Адрес вашего React-приложения
               .AllowAnyMethod()                   // Разрешить все HTTP-методы (GET, POST, PUT, DELETE)
               .AllowAnyHeader()                   // Разрешить любые заголовки
               .AllowCredentials();                // Если используете куки или авторизацию

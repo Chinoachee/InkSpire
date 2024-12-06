@@ -17,36 +17,34 @@ const Header = () => {
   return (
     <Box bg="teal.500" p={4} color="white" shadow="md">
       <Flex align="center">
-        <Heading size="lg" onClick={() => navigate('/')} cursor="pointer">
+        <Heading size="lg" cursor="pointer" onClick={() => navigate('/')}>
           InkSpire
         </Heading>
         <Spacer />
-        {user ? (
-          <Flex align="center">
-            <Text mr={4}>Welcome, {user.username}!</Text>
-            <Button colorScheme="teal" variant="outline" onClick={handleLogout}>
-              Logout
-            </Button>
-          </Flex>
-        ) : (
-          <Flex>
-            <Button
-              colorScheme="teal"
-              variant="outline"
-              mr={2}
-              onClick={() => navigate('/login')}
-            >
-              Login
-            </Button>
-            <Button
-              colorScheme="teal"
-              variant="solid"
-              onClick={() => navigate('/register')}
-            >
-              Register
-            </Button>
-          </Flex>
-        )}
+        <Flex align="center">
+          {user ? (
+            <>
+              <Text mr={4}>Welcome, {user.login}!</Text>
+              <Button colorScheme="teal" variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                colorScheme="teal"
+                variant="outline"
+                mr={2}
+                onClick={() => navigate('/login')}
+              >
+                Login
+              </Button>
+              <Button colorScheme="teal" variant="solid" onClick={() => navigate('/register')}>
+                Register
+              </Button>
+            </>
+          )}
+        </Flex>
       </Flex>
     </Box>
   );

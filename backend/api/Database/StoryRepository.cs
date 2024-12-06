@@ -12,7 +12,7 @@ namespace api.Database
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "INSERT INTO storys (title, initial_text, author_id) VALUES (@title, @initial_text, @author_id)";
+            const string query = "INSERT INTO stories (title, initial_text, author_id) VALUES (@title, @initial_text, @author_id)";
 
             using var command = new NpgsqlCommand(query, connection);
             command.Parameters.AddWithValue("@title",story.Title);
@@ -27,7 +27,7 @@ namespace api.Database
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string query = "SELECT * FROM storys WHERE author_id = @authorId";
+            const string query = "SELECT * FROM stories WHERE author_id = @authorId";
             
             using var command = new NpgsqlCommand(query,connection);
             command.Parameters.AddWithValue("@authorId",authorId);

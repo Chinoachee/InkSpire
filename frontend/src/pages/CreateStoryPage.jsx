@@ -2,67 +2,40 @@ import React, { useState } from 'react';
 import {
   Box,
   Button,
+  Flex,
   FormControl,
   FormLabel,
   Input,
   Textarea,
   Heading,
-  useToast,
-  Flex,
+  Alert,
   useColorMode,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createStory } from '../services/storyService';
 
 const CreateStoryPage = () => {
-  const [title, setTitle] = useState('');
-  const [initialText, setInitialText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { colorMode } = useColorMode();
-  const toast = useToast();
-  const navigate = useNavigate();
+  const [storyData, setStoryData] = useState({ title: '', initialText: '' });
+  const [error, setError] = useState(null);
   const { token } = useSelector((state) => state.auth);
+  const { colorMode } = useColorMode();
+  const dispatch = useDispatch();
 
-  const handleCreateStory = async (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setStoryData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!title || !initialText) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in all fields.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-  
-    setLoading(true);
     try {
-      await createStory({ title, initialText, token }); // Токен теперь передаётся в заголовке
-      toast({
-        title: 'Story created successfully!',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      setTitle('');
-      setInitialText('');
-      navigate('/'); // Перенаправляем на главную страницу
-    } catch (error) {
-      toast({
-        title: 'Failed to create story',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
+      await createStory({ ...storyData, token });
+      // Дополнительные действия после успешного создания истории
+    } catch (err) {
+      setError(err.message);
     }
   };
-  
+
   return (
     <Flex
       align="center"
@@ -78,36 +51,36 @@ const CreateStoryPage = () => {
         shadow="lg"
         w="600px"
       >
-        <Heading mb={6} textAlign="center">
+        <Heading textAlign="center" mb={6}>
           Create a New Story
         </Heading>
-        <form onSubmit={handleCreateStory}>
+        {error && (
+          <Alert status="error" mb={4}>
+            {error}
+          </Alert>
+        )}
+        <form onSubmit={handleSubmit}>
           <FormControl mb={4}>
-            <FormLabel>Story Title</FormLabel>
+            <FormLabel>Title</FormLabel>
             <Input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter the title of your story"
-              isRequired
+              name="title"
+              value={storyData.title}
+              onChange={handleChange}
+              placeholder="Enter story title"
+              required
             />
           </FormControl>
-          <FormControl mb={4}>
-            <FormLabel>Story Content</FormLabel>
+          <FormControl mb={6}>
+            <FormLabel>Initial Text</FormLabel>
             <Textarea
-              value={initialText}
-              onChange={(e) => setInitialText(e.target.value)}
-              placeholder="Write your story here..."
-              rows={8}
-              isRequired
+              name="initialText"
+              value={storyData.initialText}
+              onChange={handleChange}
+              placeholder="Enter the beginning of your story"
+              required
             />
           </FormControl>
-          <Button
-            type="submit"
-            colorScheme="teal"
-            isLoading={loading}
-            width="full"
-          >
+          <Button type="submit" colorScheme="blue" width="full">
             Create Story
           </Button>
         </form>
