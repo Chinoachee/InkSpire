@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getProfile } from '../services/profileService';
 import {
     Box,
@@ -19,6 +20,12 @@ const UserProfilePage = () => {
     const [stories, setStories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const navigate = useNavigate();
+
+    const handleNavigation = () => {
+        
+    }
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -85,7 +92,7 @@ const UserProfilePage = () => {
                                     <Button
                                         colorScheme="blue"
                                         size="sm"
-                                        onClick={() => console.log(`Read story ${story.id}`)}
+                                        onClick={() => navigate(`/story/${story.id}`)}
                                     >
                                         Прочитать
                                     </Button>

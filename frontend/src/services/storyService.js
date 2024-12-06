@@ -14,6 +14,6 @@ export const createStory = async ({ title, initialText, token }) => {
 };
 
 export const getStory = async(storyId) => {
-  const { data } = await API.get(`/${storyId}`);
+  const { data } = await API.get(`?storyId=${storyId}`);
   return data;
 }

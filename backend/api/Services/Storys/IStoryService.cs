@@ -7,5 +7,6 @@ namespace api.Services.Storys
     {
         Task CreateStory(CreateStoryRequest request, Guid authorId);
         Task<IEnumerable<StoryProfileDto>> GetUserStory(Guid authorId);
+        Task<StoryDto> GetStory(Guid id);
     }
 }

@@ -43,5 +43,30 @@ namespace api.Database
             }
             return result;
         }
+
+        public async Task<Story?> GetStoryById(Guid id)
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string query = "SELECT * FROM stories WHERE id = @Id";
+
+            using var command = new NpgsqlCommand(query, connection);
+            command.Parameters.AddWithValue("@id", id);
+
+            using var reader = await command.ExecuteReaderAsync();
+            Story? result = null;
+            if (await reader.ReadAsync())
+            {
+                result = new Story()
+                {
+                    Id = reader.GetGuid(0),
+                    Title = reader.GetString(1),
+                    InitialText = reader.GetString(2),
+                    AuthorId = reader.GetGuid(3)
+                };
+            }
+            return result;
+        }
     }
 }

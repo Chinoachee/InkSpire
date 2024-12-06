@@ -1,4 +1,5 @@
 ﻿using api.Contracts.Storys;
+using api.Exceptions;
 using api.Services.Storys;
 using api.Services.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ namespace api.Controllers
         private readonly IStoryService _storyService = storyService;
         private readonly IUserService _userService = userService;
 
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateStory(CreateStoryRequest request)
@@ -21,9 +23,7 @@ namespace api.Controllers
             {
                 var userId = _userService.GetUserId();
 
-
-                Console.WriteLine(userId);
-                await _storyService.CreateStory(request,userId);
+                await _storyService.CreateStory(request, userId);
 
                 return Ok(new { Message = "Story created successfully." });
             }
@@ -33,6 +33,22 @@ namespace api.Controllers
             }
         }
 
-        
+        [HttpGet]
+        public async Task<IActionResult> GetStory(Guid storyId)
+        {
+            try
+            {
+                var response = await _storyService.GetStory(storyId);
+                return Ok(response);
+            }
+            catch (StoryNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
